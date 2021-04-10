@@ -1,12 +1,9 @@
 provider "aws" {
-  region = "us-east-2"
+  region = "sa-east-1"
 }
 
-resource "aws_instance" "example" {
-  ami           = "ami-0c55b159cbfafe1f0"
-  instance_type = "t2.micro"
-
-  tags = {
-    Name = "terraform-example"
-  }
+resource "aws_kinesis_stream" "punk_stream" {
+  name             = "punk-stream"
+  shard_count      = 1
+  retention_period = 24
 }

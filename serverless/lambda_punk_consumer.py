@@ -20,8 +20,8 @@ def run(event, context):
 
     kinesis_client = boto3.client('kinesis', region_name='sa-east-1')
 
-    my_stream_name = 'python-stream'
-    partition_key = 'shard_1'
+    my_stream_name = 'punk-stream'
+    partition_key = 'partition_1'
     put_response = kinesis_client.put_record(
                         StreamName=my_stream_name,
                         Data=json.dumps(payload),
@@ -32,4 +32,3 @@ def run(event, context):
         "event": event
     }
 
-# aws kinesis create-stream --stream-name python-stream --shard-count 1

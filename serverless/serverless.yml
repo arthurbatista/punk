@@ -26,26 +26,12 @@ provider:
   region: sa-east-1
   runtime: python3.7
   lambdaHashingVersion: 20201221
-  iamRoleStatements:
-    - Effect: 'Allow'
-      Action:
-        - 'kinesis:PutRecord'
-        - 'kinesis:GetRecord'
-      Resource:
-        Fn::GetAtt:
-          - workStream
-          - Arn
-
+  iamManagedPolicies:
+    - 'arn:aws:iam::aws:policy/AmazonKinesisFullAccess'
+  
 functions:
   get_bear:
     handler: lambda_punk_consumer.run
     # events:
     #   - schedule: rate(5 minutes)
 #      - cloudwatchEvent:
-resources:
-  Resources:
-    workStream: 
-      Type: AWS::Kinesis::Stream
-      Properties: 
-        Name: python-stream
-        ShardCount: 1
