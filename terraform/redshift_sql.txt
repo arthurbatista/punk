@@ -1,0 +1,9 @@
+create table if not exists tbl_punk(
+name varchar(100) not null,
+abv decimal(8,2) encode delta32k,
+ibu decimal(8,2) encode delta32k,
+target_fg decimal(8,2) encode delta32k,
+target_og decimal(8,2) encode delta32k,
+ebc integer,
+srm  decimal(8,2) encode delta32k,
+ph decimal(8,2) encode delta32k);
