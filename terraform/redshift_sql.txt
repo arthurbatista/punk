@@ -4,6 +4,10 @@ abv decimal(8,2) encode delta32k,
 ibu decimal(8,2) encode delta32k,
 target_fg decimal(8,2) encode delta32k,
 target_og decimal(8,2) encode delta32k,
-ebc integer,
+ebc decimal(8,2) encode delta32k,
 srm  decimal(8,2) encode delta32k,
 ph decimal(8,2) encode delta32k);
+
+insert into punk_db.public.tbl_punk
+(name, abv, ibu, target_fg, target_og, ebc, srm, ph)
+values ('Buzz', 4.5, 60.0, 1010.0, 1044.0, 20.0, 10.0, 4.4);
