@@ -16,7 +16,7 @@ def run(event, context):
 
     payload = json.loads(res_body.decode("utf-8"))
 
-    logger.info(f'Bear name: {payload[0]["name"]}')
+    logger.info(f'Beer name: {payload[0]["name"]}')
 
     kinesis_client = boto3.client('kinesis', region_name='sa-east-1')
 
