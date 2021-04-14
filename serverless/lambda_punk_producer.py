@@ -8,10 +8,10 @@ logger.setLevel(logging.INFO)
 
 def run(event, context):
     
-    url = 'https://api.punkapi.com/v2/beers/random'
+    endpoint = 'https://api.punkapi.com/v2/beers/random'
 
     # TODO - Change user agent
-    req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    req = Request(endpoint, headers={'User-Agent': 'Mozilla/5.0'})
     res_body = urlopen(req).read()
 
     payload = json.loads(res_body.decode("utf-8"))

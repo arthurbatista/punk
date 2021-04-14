@@ -53,13 +53,15 @@ EOF
 }
 
 resource "aws_s3_bucket" "bucket_raw" {
-  bucket = "arthurbat-punk-bucket-raw"
-  acl    = "private"
+  bucket        = "arthurbat-punk-bucket-raw"
+  acl           = "private"
+  force_destroy = "true"
 }
 
 resource "aws_s3_bucket" "bucket_cleaned" {
-  bucket = "arthurbat-punk-bucket-cleaned"
-  acl    = "private"
+  bucket        = "arthurbat-punk-bucket-cleaned"
+  acl           = "private"
+  force_destroy = "true"
 }
 
 resource "aws_kinesis_stream" "punk_stream" {

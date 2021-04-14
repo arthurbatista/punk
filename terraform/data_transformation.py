@@ -4,7 +4,8 @@ import json
 def handler(event, context):
     output = []
     
-    attributes = ['name', 'abv', 'ibu', 'target_fg', 'target_og', 'ebc', 'srm', 'ph']
+    attributes = ['id', 'name', 'abv', 'ibu', 'target_fg',
+                  'target_og', 'ebc', 'srm', 'ph']
     
     for record in event['records']:
         payload = json.loads(base64.b64decode(record['data']).decode("utf-8"))
