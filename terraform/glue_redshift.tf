@@ -65,7 +65,7 @@ resource "aws_glue_catalog_table" "glue_table_punk_s3" {
     }
 
     ser_de_info {
-      serialization_library = "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe"
+      serialization_library = "org.apache.hadoop.hive.serde2.OpenCSVSerde"
 
       parameters = {
         "field.delim" = ","
@@ -73,49 +73,62 @@ resource "aws_glue_catalog_table" "glue_table_punk_s3" {
     }
 
     columns {
-      name = "col0"
+      name = "id"
       type = "bigint"
     }
 
     columns {
-      name = "col1"
+      name = "name"
       type = "string"
     }
 
     columns {
-      name = "col2"
+      name = "abv"
       type = "double"
     }
 
     columns {
-      name = "col3"
+      name = "ibu"
       type = "double"
     }
 
     columns {
-      name = "col4"
+      name = "target_fg"
       type = "double"
     }
 
     columns {
-      name = "col5"
+      name = "target_og"
       type = "double"
     }
 
     columns {
-      name = "col6"
+      name = "ebc"
       type = "double"
     }
 
     columns {
-      name = "col7"
+      name = "srm"
       type = "double"
     }
-    
+
     columns {
-      name = "col8"
+      name = "ph"
       type = "double"
     }
+  }
+}
+
+resource "aws_glue_classifier" "glue_csv_classifier" {
+  name = "glue_csv_classifier"
+
+  csv_classifier {
+    allow_single_column    = false
+    contains_header        = "ABSENT"
+    delimiter              = ","
+    disable_value_trimming = false
+    header                 = ["id", "name", "abv", "ibu", "target_fg", "target_og", "ebc", "srm","ph"]
+    quote_symbol           = "\""
   }
 }
 
@@ -133,6 +146,8 @@ resource "aws_glue_crawler" "glue_crawler_s3" {
   schema_change_policy {
     delete_behavior = "LOG"
   }
+
+  classifiers = [aws_glue_classifier.glue_csv_classifier.name]
 
   configuration = <<EOF
 {

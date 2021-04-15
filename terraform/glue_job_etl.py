@@ -19,10 +19,10 @@ job.init(args['JOB_NAME'], args)
 ## @inputs: []
 datasource0 = glueContext.create_dynamic_frame.from_catalog(database = "s3_db", table_name = "glue_table_punk_s3", transformation_ctx = "datasource0")
 ## @type: ApplyMapping
-## @args: [mapping = [("col6", "long", "ebc", "decimal(8,2)"), ("col1", "string", "name", "string"), ("col3", "long", "ibu", "decimal(8,2)"), ("col0", "long", "id", "int"), ("col2", "double", "abv", "decimal(8,2)"), ("col8", "double", "ph", "decimal(8,2)"), ("col7", "double", "srm", "decimal(8,2)"), ("col5", "long", "target_og", "decimal(8,2)"), ("col4", "long", "target_fg", "decimal(8,2)")], transformation_ctx = "applymapping1"]
+## @args: [mapping = [("id", "long", "id", "int"), ("name", "string", "name", "string"), ("abv", "double", "abv", "decimal(8,2)"), ("ibu", "long", "ibu", "decimal(8,2)"), ("target_fg", "long", "target_fg", "decimal(8,2)"), ("target_og", "long", "target_og", "decimal(8,2)"), ("ebc", "double", "ebc", "decimal(8,2)"), ("srm", "double", "srm", "decimal(8,2)"), ("ph", "double", "ph", "decimal(8,2)")], transformation_ctx = "applymapping1"]
 ## @return: applymapping1
 ## @inputs: [frame = datasource0]
-applymapping1 = ApplyMapping.apply(frame = datasource0, mappings = [("col6", "long", "ebc", "decimal(8,2)"), ("col1", "string", "name", "string"), ("col3", "long", "ibu", "decimal(8,2)"), ("col0", "long", "id", "int"), ("col2", "double", "abv", "decimal(8,2)"), ("col8", "double", "ph", "decimal(8,2)"), ("col7", "double", "srm", "decimal(8,2)"), ("col5", "long", "target_og", "decimal(8,2)"), ("col4", "long", "target_fg", "decimal(8,2)")], transformation_ctx = "applymapping1")
+applymapping1 = ApplyMapping.apply(frame = datasource0, mappings = [("id", "long", "id", "int"), ("name", "string", "name", "string"), ("abv", "double", "abv", "decimal(8,2)"), ("ibu", "long", "ibu", "decimal(8,2)"), ("target_fg", "long", "target_fg", "decimal(8,2)"), ("target_og", "long", "target_og", "decimal(8,2)"), ("ebc", "double", "ebc", "decimal(8,2)"), ("srm", "double", "srm", "decimal(8,2)"), ("ph", "double", "ph", "decimal(8,2)")], transformation_ctx = "applymapping1")
 ## @type: SelectFields
 ## @args: [paths = ["id", "name", "abv", "ibu", "target_fg", "target_og", "ebc", "srm", "ph"], transformation_ctx = "selectfields2"]
 ## @return: selectfields2
@@ -42,7 +42,7 @@ resolvechoice4 = ResolveChoice.apply(frame = resolvechoice3, choice = "make_cols
 ## @args: [database = "redshift_db", table_name = "glue_table_punk_redshift", redshift_tmp_dir = TempDir, transformation_ctx = "datasink5"]
 ## @return: datasink5
 ## @inputs: [frame = resolvechoice4]
-#datasink5 = glueContext.write_dynamic_frame.from_catalog(frame = resolvechoice4, database = "redshift_db", table_name = "glue_table_punk_redshift", redshift_tmp_dir = args["TempDir"], transformation_ctx = "datasink5")
 #TODO - s3://arthurbat-punk-bucket-redshift-tmp/
+# datasink5 = glueContext.write_dynamic_frame.from_catalog(frame = resolvechoice4, database = "redshift_db", table_name = "glue_table_punk_redshift", redshift_tmp_dir = args["TempDir"], transformation_ctx = "datasink5")
 datasink5 = glueContext.write_dynamic_frame.from_catalog(frame = resolvechoice4, database = "redshift_db", table_name = "glue_table_punk_redshift", redshift_tmp_dir = "s3://arthurbat-punk-bucket-redshift-tmp/", transformation_ctx = "datasink5")
 job.commit()
