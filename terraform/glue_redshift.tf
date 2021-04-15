@@ -2,25 +2,26 @@ resource "aws_glue_catalog_database" "glue_s3_db" {
   name = "s3_db"
 }
 
-resource "aws_glue_catalog_table" "glue_s3_table_punk" {
-  name          = "s3_table_punk"
+resource "aws_glue_catalog_table" "glue_table_punk_s3" {
+  name          = "glue_table_punk_s3"
   database_name = aws_glue_catalog_database.glue_s3_db.name
   table_type    = "EXTERNAL_TABLE"
+  retention     = 0
 
   parameters = {
-    # "CrawlerSchemaDeserializerVersion" = "1.0",
-    # "CrawlerSchemaSerializerVersion" = "1.0",
-    # "UPDATED_BY_CRAWLER" = "crawler_s3",
-    "areColumnsQuoted" = "false",
-    "averageRecordSize" = "43",
-    "classification" = "csv",
-    "columnsOrdered" = "true",
-    "compressionType" = "none",
-    "delimiter" = ",",
-    "objectCount" = "3",
-    "recordCount" = "9",
-    "sizeKey" = "443",
-    "typeOfData" = "file"
+    "CrawlerSchemaDeserializerVersion" = "1.0",
+    "CrawlerSchemaSerializerVersion"   = "1.0",
+    "UPDATED_BY_CRAWLER"               = "glue_crawler_s3",
+    "areColumnsQuoted"  = "false",
+    "averageRecordSize" = "58",
+    "classification"    = "csv",
+    "columnsOrdered"    = "true",
+    "compressionType"   = "none",
+    "delimiter"         = ",",
+    "objectCount"       = "1",
+    "recordCount"       = "4",
+    "sizeKey"           = "276",
+    "typeOfData"        = "file"
   }
 
   partition_keys {
@@ -44,25 +45,26 @@ resource "aws_glue_catalog_table" "glue_s3_table_punk" {
     location      = "s3://arthurbat-punk-bucket-cleaned/"
     input_format  = "org.apache.hadoop.mapred.TextInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+    number_of_buckets = -1
+    compressed = "false"
 
     parameters = {
-      # "CrawlerSchemaDeserializerVersion" = "1.0",
-      # "CrawlerSchemaSerializerVersion" = "1.0",
-      # "UPDATED_BY_CRAWLER" = "crawler_s3",
-      "areColumnsQuoted" = "false",
-      "averageRecordSize" = "43",
-      "classification" = "csv",
-      "columnsOrdered" = "true",
-      "compressionType" = "none",
-      "delimiter" = ",",
-      "objectCount" = "3",
-      "recordCount" = "9",
-      "sizeKey": "443",
-      "typeOfData": "file"
+      "CrawlerSchemaDeserializerVersion" = "1.0",
+      "CrawlerSchemaSerializerVersion"   = "1.0",
+      "UPDATED_BY_CRAWLER"               = "glue_crawler_s3",
+      "areColumnsQuoted"  = "false",
+      "averageRecordSize" = "58",
+      "classification"    = "csv",
+      "columnsOrdered"    = "true",
+      "compressionType"   = "none",
+      "delimiter"         = ",",
+      "objectCount"       = "1",
+      "recordCount"       = "4",
+      "sizeKey"           = "276",
+      "typeOfData"        = "file"
     }
 
     ser_de_info {
-      name                  = "arthurbat-glue-stream"
       serialization_library = "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe"
 
       parameters = {
@@ -72,12 +74,12 @@ resource "aws_glue_catalog_table" "glue_s3_table_punk" {
 
     columns {
       name = "col0"
-      type = "string"
+      type = "bigint"
     }
 
     columns {
       name = "col1"
-      type = "double"
+      type = "string"
     }
 
     columns {
@@ -104,22 +106,53 @@ resource "aws_glue_catalog_table" "glue_s3_table_punk" {
       name = "col6"
       type = "double"
     }
-    
+
     columns {
       name = "col7"
       type = "double"
     }
+    
+    columns {
+      name = "col8"
+      type = "double"
+    }
   }
+}
+
+resource "aws_glue_crawler" "glue_crawler_s3" {
+  name          = "glue_crawler_s3"
+  database_name = aws_glue_catalog_database.glue_s3_db.name
+  role          = "service-role/AWSGlueServiceRole-ImportRole2" #TODO
+  # schedule      = "cron(0 1 * * ? *)"
+
+  catalog_target {
+    database_name = aws_glue_catalog_database.glue_s3_db.name
+    tables        = [aws_glue_catalog_table.glue_table_punk_s3.name]
+  }
+
+  schema_change_policy {
+    delete_behavior = "LOG"
+  }
+
+  configuration = <<EOF
+{
+  "Version":1.0,
+  "Grouping": {
+    "TableGroupingPolicy": "CombineCompatibleSchemas"
+  }
+}
+EOF
 }
 
 resource "aws_glue_catalog_database" "glue_redshift_db" {
   name = "redshift_db"
 }
 
-resource "aws_glue_catalog_table" "glue_redshift_table_punk" {
-  name          = "redshift_table_punk"
+resource "aws_glue_catalog_table" "glue_table_punk_redshift" {
+  name          = "glue_table_punk_redshift"
   database_name = aws_glue_catalog_database.glue_redshift_db.name
   table_type    = "EXTERNAL_TABLE"
+  retention     = 0
 
   parameters = {
     "classification" = "redshift"
@@ -128,12 +161,19 @@ resource "aws_glue_catalog_table" "glue_redshift_table_punk" {
   }
 
   storage_descriptor {
-    location      = "punk_db.public.tbl_punk"
+    compressed        = "false"
+    location          = "punk_db.public.tbl_punk"
+    number_of_buckets = -1
 
     parameters = {
       "classification" = "redshift"
       "connectionName" = "redshift_connection"
       "typeOfData"     = "table"
+    }
+
+    columns {
+      name = "id"
+      type = "int"
     }
 
     columns {
@@ -175,6 +215,48 @@ resource "aws_glue_catalog_table" "glue_redshift_table_punk" {
       name = "ph"
       type = "decimal(8,2)"
     }
+  }
+}
+
+resource "aws_s3_bucket" "bucket_etl_job" {
+  bucket        = "arthurbat-punk-bucket-etl-job"
+  acl           = "private"
+  force_destroy = "true"
+}
+
+resource "aws_s3_bucket" "bucket_etl_job_temp" {
+  bucket        = "arthurbat-punk-bucket-etl-job-temp"
+  acl           = "private"
+  force_destroy = "true"
+}
+
+resource "aws_s3_bucket" "bucket_redshift_tmp" {
+  bucket        = "arthurbat-punk-bucket-redshift-tmp"
+  acl           = "private"
+  force_destroy = "true"
+}
+
+resource "aws_s3_bucket_object" "glue_etl_job" {
+  bucket = aws_s3_bucket.bucket_etl_job.id
+  key    = "glue_etl_job"
+  source = "glue_job_etl.py"
+}
+
+resource "aws_glue_job" "glue_job_s3_redshift" {
+  name     = "glue_job_s3_redshift"
+  role_arn = "arn:aws:iam::409915168629:role/service-role/AWSGlueServiceRole-ImportRole2" #TODO
+
+  command {
+    python_version  = "3"
+    script_location = "s3://arthurbat-punk-bucket-etl-job/glue_etl_job" #TODO
+  }
+
+  connections = [aws_glue_connection.redshift_connection.name]
+
+  default_arguments = {
+    "--TempDir"             = aws_s3_bucket.bucket_etl_job_temp.id,
+    "--job-bookmark-option" = "job-bookmark-enable",
+    "--job-language"        = "python"
   }
 }
 
