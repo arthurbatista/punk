@@ -66,6 +66,6 @@ resource "aws_sagemaker_notebook_instance" "punk_ml" {
   default_code_repository = aws_sagemaker_code_repository.punk_ml_repo.code_repository_name
 
   tags = {
-    Name = "foo"
+    Name = "punk_ml"
   }
 }

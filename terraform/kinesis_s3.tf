@@ -20,9 +20,7 @@ EOF
 
 resource "aws_iam_role_policy" "punk_policy" {
   name = "punk_policy"
-
   role = aws_iam_role.punk_role.id
-
   policy = <<EOF
 {
   "Version" : "2012-10-17",

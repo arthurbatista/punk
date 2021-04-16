@@ -1,6 +1,5 @@
 resource "aws_iam_role" "iam_producer" {
   name = "iam_producer"
-
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -20,9 +19,7 @@ EOF
 
 resource "aws_iam_role_policy" "policy_producer" {
   name = "policy_producer"
-
   role = aws_iam_role.iam_producer.id
-
   policy = <<EOF
 {
   "Version" : "2012-10-17",

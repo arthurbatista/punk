@@ -119,46 +119,6 @@ resource "aws_glue_catalog_table" "glue_table_punk_s3" {
   }
 }
 
-resource "aws_glue_classifier" "glue_csv_classifier" {
-  name = "glue_csv_classifier"
-
-  csv_classifier {
-    allow_single_column    = false
-    contains_header        = "ABSENT"
-    delimiter              = ","
-    disable_value_trimming = false
-    header                 = ["id", "name", "abv", "ibu", "target_fg", "target_og", "ebc", "srm","ph"]
-    quote_symbol           = "\""
-  }
-}
-
-resource "aws_glue_crawler" "glue_crawler_s3" {
-  name          = "glue_crawler_s3"
-  database_name = aws_glue_catalog_database.glue_s3_db.name
-  role          = "service-role/AWSGlueServiceRole-ImportRole2" #TODO
-  # schedule      = "cron(0 1 * * ? *)"
-
-  catalog_target {
-    database_name = aws_glue_catalog_database.glue_s3_db.name
-    tables        = [aws_glue_catalog_table.glue_table_punk_s3.name]
-  }
-
-  schema_change_policy {
-    delete_behavior = "LOG"
-  }
-
-  classifiers = [aws_glue_classifier.glue_csv_classifier.name]
-
-  configuration = <<EOF
-{
-  "Version":1.0,
-  "Grouping": {
-    "TableGroupingPolicy": "CombineCompatibleSchemas"
-  }
-}
-EOF
-}
-
 resource "aws_glue_catalog_database" "glue_redshift_db" {
   name = "redshift_db"
 }
@@ -233,6 +193,92 @@ resource "aws_glue_catalog_table" "glue_table_punk_redshift" {
   }
 }
 
+resource "aws_iam_role" "iam_role_glue" {
+  name = "iam_role_glue"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "glue.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "policy_glue" {
+  name = "policy_glue"
+  role = aws_iam_role.iam_role_glue.id
+  policy = <<EOF
+{
+  "Version" : "2012-10-17",
+  "Statement" : [
+    {
+      "Effect": "Allow",
+      "Action": "s3:*",
+      "Resource": "*" 
+    },
+    {
+      "Effect": "Allow",
+      "Action": "glue:*",
+      "Resource": "*"
+    },
+    {
+        "Effect": "Allow",
+        "Action": "ec2:*",
+        "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_glue_classifier" "glue_csv_classifier" {
+  name = "glue_csv_classifier"
+
+  csv_classifier {
+    allow_single_column    = false
+    contains_header        = "ABSENT"
+    delimiter              = ","
+    disable_value_trimming = false
+    header                 = ["id", "name", "abv", "ibu", "target_fg", "target_og", "ebc", "srm","ph"]
+    quote_symbol           = "\""
+  }
+}
+
+resource "aws_glue_crawler" "glue_crawler_s3" {
+  name          = "glue_crawler_s3"
+  database_name = aws_glue_catalog_database.glue_s3_db.name
+  role          = aws_iam_role.iam_role_glue.id
+  # schedule      = "cron(0 1 * * ? *)"
+
+  catalog_target {
+    database_name = aws_glue_catalog_database.glue_s3_db.name
+    tables        = [aws_glue_catalog_table.glue_table_punk_s3.name]
+  }
+
+  schema_change_policy {
+    delete_behavior = "LOG"
+  }
+
+  classifiers = [aws_glue_classifier.glue_csv_classifier.name]
+
+  configuration = <<EOF
+{
+  "Version":1.0,
+  "Grouping": {
+    "TableGroupingPolicy": "CombineCompatibleSchemas"
+  }
+}
+EOF
+}
+
 resource "aws_s3_bucket" "bucket_etl_job" {
   bucket        = "arthurbat-punk-bucket-etl-job"
   acl           = "private"
@@ -259,11 +305,11 @@ resource "aws_s3_bucket_object" "glue_etl_job" {
 
 resource "aws_glue_job" "glue_job_s3_redshift" {
   name     = "glue_job_s3_redshift"
-  role_arn = "arn:aws:iam::409915168629:role/service-role/AWSGlueServiceRole-ImportRole2" #TODO
+  role_arn = aws_iam_role.iam_role_glue.arn
 
   command {
     python_version  = "3"
-    script_location = "s3://arthurbat-punk-bucket-etl-job/glue_etl_job" #TODO
+    script_location = "s3://${aws_s3_bucket.bucket_etl_job.bucket}/glue_etl_job"
   }
 
   connections = [aws_glue_connection.redshift_connection.name]

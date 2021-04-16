@@ -10,7 +10,6 @@ def run(event, context):
     
     endpoint = 'https://api.punkapi.com/v2/beers/random'
 
-    # TODO - Change user agent
     req = Request(endpoint, headers={'User-Agent': 'Mozilla/5.0'})
     res_body = urlopen(req).read()
 
@@ -28,7 +27,7 @@ def run(event, context):
                         PartitionKey=partition_key)
 
     return {
-        "message": "Go Serverless v1.0! Your function executed successfully!",
+        "message": "Get beer executed successfully!",
         "event": event
     }
 
